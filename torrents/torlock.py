@@ -1,5 +1,4 @@
 import asyncio
-import re
 import time
 import aiohttp
 from bs4 import BeautifulSoup
@@ -7,7 +6,6 @@ from helper.asyncioPoliciesFix import decorator_asyncio_fix
 from helper.html_scraper import Scraper
 from constants.base_url import TORLOCK
 from constants.headers import HEADER_AIO
-
 
 class Torlock:
     def __init__(self):
@@ -23,25 +21,8 @@ class Torlock:
                 try:
                     tm = soup.find_all("a")
                     magnet = tm[20]["href"]
-                    torrent = tm[23]["href"]
-                    try:
-                        obj["poster"] = soup.find_all("img", class_="img-responsive")[
-                            0
-                        ]["src"]
-                    except:
-                        ...
-                    if str(magnet).startswith("magnet") and str(torrent).endswith(
-                        "torrent"
-                    ):
-                        obj["torrent"] = torrent
+                    if str(magnet).startswith("magnet"):
                         obj["magnet"] = magnet
-                        obj["hash"] = re.search(
-                            r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                        ).group(0)
-                        obj["category"] = tm[25].text
-                        imgs = soup.select(".tab-content img.img-fluid")
-                        if imgs and len(imgs) > 0:
-                            obj["screenshot"] = [img["src"] for img in imgs]
                     else:
                         del obj
                 except IndexError:
@@ -79,17 +60,9 @@ class Torlock:
                             break
                         url = self.BASE_URL + url
                         list_of_urls.append(url)
-                        size = td[2].get_text(strip=True)
-                        date = td[1].get_text(strip=True)
-                        seeders = td[3].get_text(strip=True)
-                        leechers = td[4].get_text(strip=True)
                         my_dict["data"].append(
                             {
                                 "name": name,
-                                "size": size,
-                                "date": date,
-                                "seeders": seeders,
-                                "leechers": leechers,
                                 "url": url,
                             }
                         )
@@ -152,5 +125,3 @@ class Torlock:
                     category = "ebooks"
                 url = self.BASE_URL + "/{}/{}/added/desc.html".format(category, page)
             return await self.parser_result(start_time, url, session)
-
-    #! Maybe impelment Search By Category in Future
