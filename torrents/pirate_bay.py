@@ -1,10 +1,8 @@
-import re
 import time
 import aiohttp
 from bs4 import BeautifulSoup
 from helper.html_scraper import Scraper
 from constants.base_url import PIRATEBAY
-
 
 class PirateBay:
     def __init__(self):
@@ -24,28 +22,10 @@ class PirateBay:
                     except:
                         name = None
                     if name:
-                        url = td[1].find("a")["href"]
                         magnet = td[3].find_all("a")[0]["href"]
-                        size = td[4].text.strip()
-                        seeders = td[5].text
-                        leechers = td[6].text
-                        category = td[0].find_all("a")[0].text
-                        uploader = td[7].text
-                        dateUploaded = td[2].text
-                           
                         my_dict["data"].append(
                             {
                                 "name": name,
-                                "size": size,
-                                "seeders": seeders,
-                                "leechers": leechers,
-                                "category": category,
-                                "uploader": uploader,
-                                "url": url,
-                                "date": dateUploaded,
-                                "hash": re.search(
-                                    r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                                ).group(0),
                                 "magnet": magnet,
                             }
                         )
