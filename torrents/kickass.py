@@ -1,5 +1,4 @@
 import asyncio
-import re
 import time
 import aiohttp
 from bs4 import BeautifulSoup
@@ -7,7 +6,6 @@ from helper.asyncioPoliciesFix import decorator_asyncio_fix
 from helper.html_scraper import Scraper
 from constants.base_url import KICKASS
 from constants.headers import HEADER_AIO
-
 
 class Kickass:
     def __init__(self):
@@ -21,18 +19,8 @@ class Kickass:
                 html = await res.text(encoding="ISO-8859-1")
                 soup = BeautifulSoup(html, "html.parser")
                 try:
-                    poster = soup.find("a", class_="movieCover")
-                    if poster:
-                        poster = poster.find("img")["src"]
-                        obj["poster"] = self.BASE_URL + poster
-                    imgs = (soup.find("div", class_="data")).find_all("img")
-                    if imgs and len(imgs) > 0:
-                        obj["screenshot"] = [img["src"] for img in imgs]
                     magnet_and_torrent = soup.find_all("a", class_="kaGiantButton")
                     magnet = magnet_and_torrent[0]["href"]
-                    obj["hash"] = re.search(
-                        r"([{a-f\d,A-F\d}]{32,40})\b", magnet
-                    ).group(0)
                     obj["magnet"] = magnet
                 except:
                     ...
@@ -58,26 +46,14 @@ class Kickass:
                 list_of_urls = []
                 my_dict = {"data": []}
                 for tr in soup.select("tr.odd,tr.even"):
-                    td = tr.find_all("td")
                     name = tr.find("a", class_="cellMainLink").text.strip()
                     url = self.BASE_URL + tr.find("a", class_="cellMainLink")["href"]
                     list_of_urls.append(url)
                     if name:
-                        size = td[1].text.strip()
-                        seeders = td[4].text.strip()
-                        leechers = td[5].text.strip()
-                        uploader = td[2].text.strip()
-                        date = td[3].text.strip()
-
                         my_dict["data"].append(
                             {
                                 "name": name,
-                                "size": size,
-                                "date": date,
-                                "seeders": seeders,
-                                "leechers": leechers,
                                 "url": url,
-                                "uploader": uploader,
                             }
                         )
                     if len(my_dict["data"]) == self.LIMIT:
