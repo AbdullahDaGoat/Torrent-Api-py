@@ -1,5 +1,4 @@
 import asyncio
-import re
 import time
 import aiohttp
 from bs4 import BeautifulSoup
@@ -7,7 +6,6 @@ from helper.asyncioPoliciesFix import decorator_asyncio_fix
 from helper.html_scraper import Scraper
 from constants.base_url import LIMETORRENT
 from constants.headers import HEADER_AIO
-
 
 class Limetorrent:
     def __init__(self):
@@ -22,11 +20,7 @@ class Limetorrent:
                 soup = BeautifulSoup(html, "html.parser")
                 try:
                     a_tag = soup.find_all("a", class_="csprite_dltorrent")
-                    obj["torrent"] = a_tag[0]["href"]
                     obj["magnet"] = a_tag[-1]["href"]
-                    obj["hash"] = re.search(
-                        r"([{a-f\d,A-F\d}]{32,40})\b", obj["magnet"]
-                    ).group(0)
                 except:
                     ...
         except:
@@ -58,20 +52,9 @@ class Limetorrent:
                     name = td[0].get_text(strip=True)
                     url = self.BASE_URL + td[0].find_all("a")[-1]["href"]
                     list_of_urls.append(url)
-                    added_on_and_category = td[1].get_text(strip=True)
-                    date = (added_on_and_category.split("-")[0]).strip()
-                    category = (added_on_and_category.split("in")[-1]).strip()
-                    size = td[2].text
-                    seeders = td[3].text
-                    leechers = td[4].text
                     my_dict["data"].append(
                         {
                             "name": name,
-                            "size": size,
-                            "date": date,
-                            "category": category if category != date else None,
-                            "seeders": seeders,
-                            "leechers": leechers,
                             "url": url,
                         }
                     )
