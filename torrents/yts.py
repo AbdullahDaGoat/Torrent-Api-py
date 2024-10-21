@@ -8,7 +8,6 @@ from helper.html_scraper import Scraper
 from constants.base_url import YTS
 from constants.headers import HEADER_AIO
 
-
 class Yts:
     def __init__(self):
         self.BASE_URL = YTS
@@ -22,56 +21,11 @@ class Yts:
                 soup = BeautifulSoup(html, "html.parser")
                 try:
                     name = soup.select_one("div.hidden-xs h1").text
-                    div = soup.select("div.hidden-xs h2")
-                    date = div[0].text
-                    genre = div[1].text.split("/")
-                    rating = soup.select_one("[itemprop=ratingValue]").text
-                    poster = (
-                        soup.find("div", id="movie-poster")
-                        .find("img")["src"]
-                        .split("/")
-                    )
-                    poster[-1] = poster[-1].replace("medium", "large")
-                    poster = "/".join(poster)
-                    description = soup.select("div#synopsis > p")[0].text.strip()
-                    runtime = (
-                        soup.select_one(".tech-spec-info")
-                        .find_all("div", class_="row")[-1]
-                        .find_all("div")[-3]
-                        .text.strip()
-                    )
-
-                    screenshots = soup.find_all("a", class_="screenshot-group")
-                    screenshots = [a["href"] for a in screenshots]
                     torrents = []
                     for div in soup.find_all("div", class_="modal-torrent"):
-                        quality = (
-                            div.find("div", class_="modal-quality").find("span").text
-                        )
-                        all_p = div.find_all("p", class_="quality-size")
-                        quality_type = all_p[0].text
-                        size = all_p[1].text
-                        torrent_link = div.find("a", class_="download-torrent")["href"]
                         magnet = div.find("a", class_="magnet-download")["href"]
-                        hash = re.search(r"([{a-f\d,A-F\d}]{32,40})\b", magnet).group(0)
-                        torrents.append(
-                            {
-                                "quality": quality,
-                                "type": quality_type,
-                                "size": size,
-                                "torrent": torrent_link,
-                                "magnet": magnet,
-                                "hash": hash,
-                            }
-                        )
+                        torrents.append({"magnet": magnet})
                     obj["name"] = name
-                    obj["date"] = date
-                    obj["genre"] = genre
-                    obj["rating"] = rating
-                    obj["poster"] = poster
-                    obj["description"] = description
-                    obj["runtime"] = runtime
-                    obj["screenshot"] = screenshots
                     obj["torrents"] = torrents
                 except:
                     ...
@@ -118,7 +72,6 @@ class Yts:
                             if type(total_page) == float
                             else int(total_page)
                         )
-
                 except:
                     ...
                 return my_dict, list_of_urls
